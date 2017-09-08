@@ -1,0 +1,85 @@
+{% extends "template.html" %}
+  {% block content %}
+   <h2>Welcome to eQTL database of AssureX Medical & Science Department</h2>
+   <p> This database store eQTL data and figures for a list of genes, this web tool was developed to display manhattan plot using BrainClound data.
+   Note that there may be more than one plot for one gene due to mulitple probes for that gene.</p>
+   <p><a href="/logout">Logout</a></p>
+   <p><a href="/main">Back to Home</a></p>
+
+      <form action="{{ url_for('search2') }}" method="post" class="search">
+      <center> <p><label><strong> Display p value of SNP:</strong></label></p></center>
+      <center> <p><textarea name="SNP" rows="1" cols="40">rs115608400</textarea></p></center>
+      <center> <p><input class="button" type="submit" value="Submit"> </p></center>
+    </form>
+
+   {% for s in snp %}
+     <p> p-value is {{ s.p_value }} for {{ s.gene_name }} </p>
+     <br/> <br/>
+   {% endfor %}
+
+   
+   <form action="{{ url_for('search') }}" method="post" class="search">
+     <table>
+       <tr>
+        <td><label><input type="checkbox" name="Gene" value="ABCB1"/></label>ABCB1</td>
+        <td><label><input type="checkbox" name="Gene" value="AHR"/  ></label>AHR</td>
+        <td><label><input type="checkbox" name="Gene" value="AHRR"/ ></label>AHRR</td>
+        <td><label><input type="checkbox" name="Gene" value="ANKK1"/></label>ANKK1</td>
+        <td><label><input type="checkbox" name="Gene" value="BDNF" /></label>BDNF</td>
+        <td><label><input type="checkbox" name="Gene" value="CACNA2D3" /></label>CACNA2D3</td>
+        <td><label><input type="checkbox" name="Gene" value="CLOCK"/></label>CLOCK</td>
+        <td><label><input type="checkbox" name="Gene" value="CLUAP1"/></label>CLUAP1</td>
+        <td><label><input type="checkbox" name="Gene" value="COMT"/  ></label>COMT</td>
+        <td><label><input type="checkbox" name="Gene" value="CREB1"/ ></label>CREB1</td>
+        <td><label><input type="checkbox" name="Gene" value="CRY1"/  ></label>CRY1</td>
+        <td><label><input type="checkbox" name="Gene" value="CRY2"/  ></label>CRY2</td>
+       </tr>
+     <tr>
+        <td><label><input type="checkbox" name="Gene" value="DLG4" /></label>DLG4</td>
+        <td><label><input type="checkbox" name="Gene" value="DNER" /></label>DNER</td>
+        <td><label><input type="checkbox" name="Gene" value="DRD2" /></label>DRD2</td>
+        <td><label><input type="checkbox" name="Gene" value="DRD4" /></label>DRD4</td>
+        <td><label><input type="checkbox" name="Gene" value="FKBP5"/></label>FKBP5</td>
+        <td><label><input type="checkbox" name="Gene" value="FUT8" /></label>FUT8</td>
+        <td><label><input type="checkbox" name="Gene" value="IDO1" /></label>IDO1</td>
+        <td><label><input type="checkbox" name="Gene" value="IL1B" /></label>IL1B</td>
+        <td><label><input type="checkbox" name="Gene" value="IL23A"/></label>IL23A</td>
+        <td><label><input type="checkbox" name="Gene" value="IL8"  /></label>IL8</td>
+        <td><label><input type="checkbox" name="Gene" value="KCNK2"/></label>KCNK2</td>
+        <td><label><input type="checkbox" name="Gene" value="KLHL6"/></label>KLHL6</td>
+     </tr>
+     <tr>
+         <td><label><input type="checkbox" name="Gene" value="KMO"  /></label>KMO</td>
+         <td><label><input type="checkbox" name="Gene" value="KYNU" /></label>KYNU</td>
+         <td><label><input type="checkbox" name="Gene" value="NLRP3"/></label>NLRP3</td>
+         <td><label><input type="checkbox" name="Gene" value="NTRK2"/></label>NTRK2</td>
+         <td><label><input type="checkbox" name="Gene" value="OPRM1"/></label>OPRM1</td>
+         <td><label><input type="checkbox" name="Gene" value="PCLO" /></label>PCLO</td>
+         <td><label><input type="checkbox" name="Gene" value="PENK" /></label>PENK</td>
+         <td><label><input type="checkbox" name="Gene" value="PER1" /></label>PER1</td>
+         <td><label><input type="checkbox" name="Gene" value="PER2" /></label>PER2</td>
+         <td><label><input type="checkbox" name="Gene" value="SIRT1"/></label>SIRT1</td>
+         <td><label><input type="checkbox" name="Gene" value="SLC18A2" /></label>SLC18A2</td>
+         <td><label><input type="checkbox" name="Gene" value="SLC6A15" /></label>SLC6A15</td>
+     </tr>
+     <tr>
+         <td><label><input type="checkbox" name="Gene" value="SLC6A2"/></label>SLC6A2</td>
+         <td><label><input type="checkbox" name="Gene" value="SOD2"  /></label>SOD2</td>
+         <td><label><input type="checkbox" name="Gene" value="STAB2" /></label>STAB2</td>
+         <td><label><input type="checkbox" name="Gene" value="TPH1"  /></label>TPH1</td>
+         <td><label><input type="checkbox" name="Gene" value="TPH2"  /></label>TPH2</td>
+         <td><label><input type="checkbox" name="Gene" value="VEGFA" /></label>VEGFA</td>
+         <td><label><input type="checkbox" name="Gene" value="VGF"   /></label>VGF</td>
+     </tr>
+     </table>
+      <center> <p><input class="button" type="submit" value="Click to display manhattan plot"> </p></center>
+    </form>
+
+ 
+   {% for g in gene %}
+     <img src= "{{ url_for('static', filename='FigFiles/manhattanPlot/'+g.fileName) }}"></img> 
+     <h3> {{ g.geneID }}  {{ g.fileName }} </h3>
+     <br/> <br/>
+   {% endfor %}
+{% endblock %}
+
