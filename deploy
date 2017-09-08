@@ -1,0 +1,121 @@
+
+Deploy Flask & Python3 on Apache2 & Ubuntu
+Flask is a very simple framework for writing server side applications with Python. This article shows how to deploy Flask
+the way it’s installed on a public server.
+
+We use modern and well established tools: Python 3, Apache 2.4 and mod_wsgi. All applications are available from official
+repositories on since Ubuntu 14.04, except vagrant and virtualbox that are only used for virtualizing the test environment. 
+All of them are Free software.This tutorial builds the system in small, separately testable steps.
+To follow this article, you should be fluent with the command line interface, sudo, sudoedit, reading logs, programming Python
+and controlling daemons such as Apache.
+
+Test Environment
+$ mkdir testflask/ && cd testflask/
+$ 
+
+Hello Flask World
+Install Python3 versions of required tools & libraries
+$ sudo apt-get update
+$ sudo apt-get -y install python3 ipython3 python3-flask curl
+$ vi moi.py
+Write Hello World with ‘vi moi.py’ and save it. Yes, it’s nice and simple.
+from flask import Flask
+app = Flask(__name__)
+
+@app.route('/')
+def hello_world():
+    return 'See you in somewhere.com!\n\n'
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+
+Try with Development Server
+Development server is not suitable for public use. You must still deploy your program on Apache2+mod_wsgi when you publish it.
+Just run your moi.py script like any other Python3 program to start the development server.
+
+$ python3 moi.py
+* Running on http://0.0.0.0:5000/
+Test it on another terminal (on the same host)
+$ curl http://localhost:5000
+See you in somewhere.com!
+
+You can kill your development server (“python3 moi.py”) with ctrl-C.
+
+Now, let’s deploy your first program on a real server.
+Install Apache2 Web Server
+Install Apache2.
+$ sudo apt-get -y install apache2
+Once it’s done, try browsing the default web page.
+$ curl -s http://localhost/|grep -i title
+<title>Apache2 Ubuntu Default Page: It works</title>
+You should see the text of the default website. If you want to see the whole welcome page, just run “curl localhost”.
+
+Mod_wsgi for running Python3 with Apache
+Install mod_wsgi, the module for running your Python code from Apache. You must use python3 version of mod_wsgi. If you have 
+installed the old Python 2 version of mod_wsgi module, you must remove it first with “sudo apt-get -y remove libapache2-mod-wsgi”.
+$ sudo apt-get -y install libapache2-mod-wsgi-py3
+
+Virtualhost for Your New Program
+Virtualhosts are the sites Apache2 is serving. Create a new available virtualhost
+$ sudo vi /etc/apache2/sites-available/moi.conf
+You probably don’t have nameserver configured for “ServerName tero.example.com”, but we’ll later make this the default website by
+disabling other virtualhosts.
+Notice the new syntax “Require all granted” instead of the obsolete “Order allow,deny”, “Allow from all”. If you mistakenly use the
+obsolete syntax, you get “‘AH01630: client denied by server configuration” in the logs. The “Require all granted” is used since 
+Apache 2.4.
+“WSGIScriptReloading On” allows updating your flask program without restarting apache, and thus, without sudo. When you modify your
+program (Python code, HTML…), you can load new code with ‘touch /home/vagrant/flask/moi.wsgi’.
+## /etc/apache2/sites-available/moi.conf
+<VirtualHost *>
+ ServerName tero.example.com
+
+ WSGIDaemonProcess moi user=yliu group=yliu threads=5
+ WSGIScriptAlias / /home/yliu/flask/moi.wsgi
+
+<Directory /home/yliu /flask/>
+ WSGIProcessGroup moi
+ WSGIApplicationGroup %{GLOBAL}
+ WSGIScriptReloading On
+
+ Require all granted
+</Directory>
+</VirtualHost>
+
+Let’s make this moi.conf the default. Disable all other virtualhosts, and enable only moi.conf.
+$ sudo a2dissite 000-default.conf
+$ sudo a2ensite moi.conf
+$ sudo service apache2 restart
+The modifications are only enabled after you restart Apache daemon. To verify that moi.conf is the only virtualhost, you can
+‘ls /etc/apache2/sites-enabled/’ and see that “moi.conf” is the only symlink there.
+
+Test your new site and to see – the error.
+$ curl -s http://localhost/|grep title
+<title>404 Not Found</title>
+It gives you the 404. Why? We haven’t created the moi.wsgi script yet. From the error message you can see that your virtualhost 
+changes have an effect on the system. Let’s create moi.wsgi next.
+
+Your Own moi.wsgi Script
+To run the Python program, you’ll need a WSGI script.
+$ cd /home/yliu/flask
+$ vi moi.wsgi
+Notice how this script makes sure that it’s run with Python version 3.To save, ctrl-x y enter.
+import sys
+
+if sys.version_info[0]<3:       # require python3
+ raise Exception("Python3 required! Current (wrong) version: '%s'" % sys.version_info)
+
+sys.path.insert(0, '/home/yliu/flask/')
+from moi import app as application
+Enjoy your page
+Restart the web server to load your modifications
+$ sudo service apache2 restart
+And try it out
+$ curl localhost
+See you in TeroKarvinen.com!
+Well done!
+Still sceptical? Let’s see that it’s reallly served by Apache (instead of the built-in development server):
+$ curl -sI localhost|grep Server
+Server: Apache/2.4.7 (Ubuntu)
+If you want to see that it can serve a lot of requests (and you know how to do load testing safely), 
+you can try “ab -n 100 -c 100 http://localhost/”, but be careful to point stress testing tools only to hosts you own.
+
