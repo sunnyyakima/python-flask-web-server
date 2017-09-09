@@ -48,6 +48,7 @@ $ sudo apt-get -y install apache2
 Once it’s done, try browsing the default web page.
 $ curl -s http://localhost/|grep -i title
 <title>Apache2 Ubuntu Default Page: It works</title>
+
 You should see the text of the default website. If you want to see the whole welcome page, just run “curl localhost”.
 
 Mod_wsgi for running Python3 with Apache
@@ -64,7 +65,8 @@ Notice the new syntax “Require all granted” instead of the obsolete “Order
 obsolete syntax, you get “‘AH01630: client denied by server configuration” in the logs. The “Require all granted” is used since 
 Apache 2.4.
 “WSGIScriptReloading On” allows updating your flask program without restarting apache, and thus, without sudo. When you modify your
-program (Python code, HTML…), you can load new code with ‘touch /home/vagrant/flask/moi.wsgi’.
+program (Python code, HTML…), you can load new code with ‘touch /home/yliu/flask/moi.wsgi’.
+
 ## /etc/apache2/sites-available/moi.conf
 <VirtualHost *>
  ServerName tero.example.com
@@ -72,7 +74,7 @@ program (Python code, HTML…), you can load new code with ‘touch /home/vagran
  WSGIDaemonProcess moi user=yliu group=yliu threads=5
  WSGIScriptAlias / /home/yliu/flask/moi.wsgi
 
-<Directory /home/yliu /flask/>
+<Directory /home/yliu/flask/>
  WSGIProcessGroup moi
  WSGIApplicationGroup %{GLOBAL}
  WSGIScriptReloading On
@@ -99,6 +101,7 @@ To run the Python program, you’ll need a WSGI script.
 $ cd /home/yliu/flask
 $ vi moi.wsgi
 Notice how this script makes sure that it’s run with Python version 3.To save, ctrl-x y enter.
+
 import sys
 
 if sys.version_info[0]<3:       # require python3
@@ -106,6 +109,7 @@ if sys.version_info[0]<3:       # require python3
 
 sys.path.insert(0, '/home/yliu/flask/')
 from moi import app as application
+
 Enjoy your page
 Restart the web server to load your modifications
 $ sudo service apache2 restart
