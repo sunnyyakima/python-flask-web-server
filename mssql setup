@@ -18,3 +18,12 @@ source ~/.bashrc
 sudo apt-get install unixodbc-dev
 pip install pyodbc
 
+
+https://docs.microsoft.com/en-us/sql/connect/python/pyodbc/step-3-proof-of-concept-connecting-to-sql-using-pyodbc
+import pyodbc 
+server = 'tcp:myserver.database.windows.net' 
+database = 'mydb' 
+username = 'myusername' 
+password = 'mypassword' 
+cnxn = pyodbc.connect('DRIVER={ODBC Driver 13 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
+cursor = cnxn.cursor()
