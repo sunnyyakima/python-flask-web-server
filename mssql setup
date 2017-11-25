@@ -1,5 +1,7 @@
 
 install pyodbc
+
+Microsoft ODBC Driver 13.1 for SQL Server
 from microsoft website(https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server):
 sudo su 
 curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
