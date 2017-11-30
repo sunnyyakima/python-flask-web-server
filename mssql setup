@@ -27,3 +27,6 @@ username = 'myusername'
 password = 'mypassword' 
 cnxn = pyodbc.connect('DRIVER={ODBC Driver 13 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
 cursor = cnxn.cursor()
+
+# create_engine from SQLAlchemy
+engine =  create_engine('mssql+pyodbc://UserID:password@seqserverAddress:1433/databaseName?driver=ODBC+Driver+13+for+SQL+Server')
