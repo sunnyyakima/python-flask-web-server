@@ -1,0 +1,30 @@
+# sql.py - Create a SQLite3 table and populate it uisng a text file
+
+import sqlite3
+import re
+import sys
+
+def populateAFDB(infile, db):
+    connection = sqlite3.connect(db)
+    with connection:
+        cur = connection.cursor()
+        cur.execute('drop table if exists variantSum')
+# variants	sample2	sample4	sample5	sample7	sample6	sample8	sample3	sample1
+        cur.execute('CREATE TABLE  variantSum  (variant TEXT,samp2 REAL,samp4 REAL,samp5 REAL,samp7 REAL,samp6 REAL,samp8 REAL,samp3 REAL,samp1 REAL)')
+        with open(infile, 'r') as f:
+            for line in f:
+#                line.rstrip('\r\n')
+                d = line.split("\t")
+                d[-1] = d[-1].rstrip()
+#                print(d)
+#                exit()
+                cur.execute('INSERT INTO variantSum VALUES (?,?,?,?,?,?,?,?,?)',d)
+    connection.commit()
+    cur = connection.execute("select * from variantSum where variant = 'chr10_43595968'")
+    af_extracted =  cur.fetchall()
+    print(af_extracted)
+
+
+script, af_in, db_name = sys.argv
+populateAFDB(af_in, db_name)
+
