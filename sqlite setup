@@ -1,0 +1,1 @@
+sqlite:////home/yliu/NGS_db/summary_data.db  # //// using absolute path # /// if db in current path
