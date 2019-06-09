@@ -1,0 +1,69 @@
+variable, control flow, include and extend
+
+By default, Flask expects the templates to be placed in a folder named templates at the application root level. 
+Flask then automatically reads the contents by making this folder available for use with the render_template() method.
+
+{{ variable_name }}
+
+filter
+{{ name|capitalize }} # safe, lower, upper, title, trim, striptags
+var = '<h1>Hello</h1>'
+{{ var | safe }} or {{ var | striptags }}
+
+control structure
+{% if user %}
+        Hello, {{ user }}!
+    {% else %}
+        Hello, Stranger!
+{% endif %}
+
+{% for comment in comments %} 
+    <li>{{ comment }}</li>
+{% endfor %}
+
+include (usually for footer and header)
+By default, the {% include %} tag expects the name of a template. For example, {% include "footer.html" %} 
+inserts the contents of the footer.html template in the position of the template where it's declared. The 
+{% include %} tag also makes the underlying template aware of variables. This meas the footer.html template
+can have variable definitions (e.g.{{year}}) and if the calling template has these variable definitions, the 
+{% include %} tag automatically substitutes these values.
+In addition, it's possible to provide a list of templates as a fall-back mechanism. For example, 
+{% include ['special_sidebar.html', 'sidebar.html'] ignore missing %} tells Jinja to first attempt to locate 
+the special_sidebar.html template and if it isn't found to attempt to locate the sidebar.html template, if neither
+template is found the last argument ignore missing tells Jinja to render nothing. Note the ignore missing 
+argument can also be used in individual statements (e.g. {% include "footer.html" ignore missing %}, as well as 
+lists). In addition, if the ignore missing statement is not used and Jinja can't find a matching template declared
+in {% include %} Jinja raises an exception.
+
+extend
+The {% extends %} tag uses the syntax {% extends <name> %} to reuse the layout of another template. This means
+that in order to reuse the layout in listing 4-5 defined in a file base.html, you use the syntax {% extends "base.html" %},
+as illustrated in following.
+
+{% if user %}
+   {% extends "base.html" %}
+ {% else %}
+   {% extends "signup_base.html" %}
+{% endif %}
+{% block title %}Coffeehouse home page{% endblock %} 
+
+Look how the above uses the {% extends "base.html" %} wrapped around the {% if user %} statement. If the user variable
+is defined, Jinja extends the base.html template, otherwise it extends the signup_base.html template.
+
+In addition, notice how it defines the {% block title %} tag with the content Coffeehouse home page. The block
+ overrides the title block from the base.html template. So where are the HTML <title> tags? There aren't any and you
+ don't need them. Jinja automatically reuses the layout from either the base.html or signup_base.html templates and 
+ substitutes the blocks content where necessary.
+
+Jinja templates that reuse other templates tend to have limited layout elements (e.g. HTML tags) and more Jinja block 
+statements to override content. This is beneficial because as I outlined previously, it lets you establish the overall 
+layout once and define content on a page by page basis.
+
+The re-usability of Jinja templates can occur multiple times. For example, you can have templates A, B and C, where B 
+requires to reuse A, but C requires to reuse parts of B. The only difference is template C needs to use the 
+{% extends "B" %} tag instead of the {% extends "A"%} tag. But since template B reuses A, template C also has access to
+the same elements in template A.
+
+When reusing Jinja templates, it's also possible to access the block content from a parent template. Jinja exposes the 
+block content from a parent template through the super() method. Listing 4-7 illustrates three templates that show this 
+mechanism for a block containing web page paths or 'breadcrumbs'.
