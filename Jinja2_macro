@@ -1,0 +1,104 @@
+# copied from:
+https://www.webforefront.com/django/createreusablejinjatemplates.html
+
+The {% macro %} tag allows the definition of reusable content snippets across templates. For example, if you need to 
+incorporate elaborate markup to display elements that have common characteristics, you can define the elaborate markup 
+once in a {% macro %} statement and then re-use this {% macro %} to output the markup customized to each element instance.
+
+Macros are helpful because if you decide to change the markup, you only need to change it in a single location and the 
+changes propagate to other locations. Listing 4-8 illustrates the definition of a {% macro %} statement and its usage in
+templates.
+Listing 4-8. Jinja {% macro %} definition and use of {% import %}
+
+# base.html template 
+{% macro coffeestore(name, id='', address='', city='San Diego', state='CA', email=None) -%}
+    <a id="{{id}}"></a>
+    <h4>{{name}}</h4>
+    <p>{{address}} {{city}},{{state}}</p>
+    {% if email %}<p><a href='mailto:{{email}}'>{{email}}</a></p>{% endif %}
+{%- endmacro %}
+
+# index.html template calls inherited macro directly
+{% extends "base.html" %} 
+{{coffeestore('Downtown',1,'Horton Plaza','San Diego','CA','downtown@coffeehouse.com')}}
+
+# detail.html template with no extends, uses {% import %} to access macro in base.html
+{% import 'base.html' as base %}
+{{base.coffeestore('Downtown',1,'Horton Plaza','San Diego','CA','downtown@coffeehouse.com')}}
+
+# otherdetail.html template with no extends, uses {% from import %} to access macro in base.html
+{% from 'base.html' import coffeestore as mycoffeestoremacro %}
+{{mycoffeestoremacro('Downtown',1,'Horton Plaza','San Diego','CA','downtown@coffeehouse.com')}}
+
+The first thing that's done in listing 4-8 is the {% macro %} definition declared in the base.html template. 
+Notice that after the {% macro snippet, there's what appears to be a regular method named coffeestore, which 
+corresponds to the name of the macro with six input arguments, five of which have default values. Next, inside 
+the {% macro %} and {% endmacro %} statements you can see some elaborate HTML markup that makes use of the 
+standard {{ }} syntax to output whatever variable values are passed on a given instance of the macro.
+
+Since the {% macro %} in listing 4-8 is defined inside the base.html template, any other template that uses 
+the base.html template can access the macro and call the macro with an instance (e.g. {{coffeestore('Downtown',1,
+'Horton Plaza','San Diego','CA','downtown@coffeehouse.com')}} -- hard-coded values for simplicity) for Jinja 
+to render the HTML markup customized with the instance values.
+
+If you want to access a {% macro %} in other templates you have three alternatives which are also presented 
+in listing 4-8. If a template extends another template (e.g. {% extends "base.html" %}) then by default it 
+will also gain access to the parent's template {% macro %} definitions. It's also possible to access another
+template's {% macro %} definitions with the {% import %} statement. For example, the statement 
+{% import 'base.html' as base %} imports the base.html definitions into another template with the base namespace,
+in which case to invoke the {% macro %} called coffeestore you would use the {{base.coffeestore(...}} syntax. 
+Finally, it's also possible to selectively import a {% macro %} definition with the {% from import %} statement. 
+For example, the statement {% from 'base.html' import coffeestore as mycoffeestoremacro %} imports the 
+coffeestore definition from the base.html template and places it under the mycoffeestoremacro name, in which case
+you would use the {{mycoffeehousemacro(...}} syntax to invoke the {% macro %}.
+
+The {% call %} tag is another option that used in conjunction with the {% macro %} tags favors the re-usability
+of macros themselves. The first usage scenario of the {% call %} tag is to invoke a {% macro %} that requires
+a placeholder for content that's defined until the invocation of the macro. Listing 4-9 illustrates this basic 
+scenario of the {% call %} tag along with a {% macro %}.
+Listing 4-9. Jinja {% call %} and {% macro %} use
+
+# macro definition
+{% macro contentlist(adcolumn_width=3,contentcolumn_width=6) -%}
+   <div class="col-md-{{adcolumn_width}}">
+    Sidebar ads
+   </div>
+   <div class="col-md-{{contentcolumn_width}}">
+      {{ caller() }}
+   </div>
+   <div class="col-md-{{adcolumn_width}}">
+    Sidebar ads
+   </div>
+{%- endmacro %}
+
+# macro call/invocation
+{% call contentlist() %} 
+  <ul>
+    <li>This is my list</li> 
+  </ul>
+{% endcall %}
+
+# rendering
+<div class="col-md-3">
+    Sidebar ads
+</div>
+<div class="col-md-6">
+  <ul>
+    <li>This is my list</li> 
+  </ul>
+</div>
+<div class="col-md-3">
+    Sidebar ads
+</div>
+
+In listing 4-9 we first define a {% macro %} with a similar structure to that of listing 3-8, however, notice inside
+the {% macro %} the {{ caller() }} statement. The caller() method inside {% macro %} serves as placeholder to be 
+substituted by the calling entity.
+
+Next, in listing 4-9 you can see the {% call %} statement is declared with the macro call -- in this case contentlist()
+-- and the body of the {% call %} statement contains an HTML list. When Jinja executes the {% call %} statement, the 
+{% call %} contents are placed in the location of the {% macro %} {{caller()}} declaration.
+
+A more advanced scenario of the {% call %} tag with a {% macro %} is for the caller() statement to use references, 
+a process that's more natural to data that's recursive in nature (i.e. a macro over a macro). Listing 4-10 illustrates 
+this recursive scenario of the {% call %} tag along with a {% macro %}.
