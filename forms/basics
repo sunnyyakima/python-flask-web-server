@@ -15,4 +15,6 @@ class InfoForm(FlaskForm):
 @app.route("/info", methods=["GET","POST"])
 def get_info():
    form = InfoForm # create an instance of the FlaskForm
+   if form_validate_on_submit():
+      formdata= form.name.data
    # handle the submission of the form
