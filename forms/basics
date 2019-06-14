@@ -1,0 +1,18 @@
+from flask import Flask
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired
+
+# configure a secret key
+app.config['SECRET_KEY'] = "supersecretkey"
+
+# define FlaskForm subclass forthe form
+class InfoForm(FlaskForm):
+   name = StringField("info field:", validators=[DataRequired()])
+   submit = SubmitField("Submit")
+   
+# set view function
+@app.route("/info", methods=["GET","POST"])
+def get_info():
+   form = InfoForm # create an instance of the FlaskForm
+   # handle the submission of the form
